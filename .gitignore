@@ -1,0 +1,6 @@
+*.bak
+.mock*
+result/*
+.swo
+.swp
+node_modules

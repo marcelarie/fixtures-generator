@@ -1,6 +1,6 @@
 const { faker } = require("@faker-js/faker");
 
-const mockEntry = function(id: number) {
+function mockEntry(id: number) {
     return {
         id: id,
         name: `Text ${faker.string.alpha({ length: { min: 5, max: 10 } })}`,
@@ -22,4 +22,5 @@ const mockEntry = function(id: number) {
     };
 };
 
-export default mockEntry;
+
+export { mockEntry };

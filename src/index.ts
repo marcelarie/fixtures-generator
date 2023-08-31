@@ -1,6 +1,6 @@
 const { faker } = require("@faker-js/faker");
 const fs = require("fs");
-const mockEntry = require("./mock-entry.ts");
+const { mockEntry } = require("./mock-entry.ts");
 
 function fileExists(filename: string) {
   try {

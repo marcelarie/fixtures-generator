@@ -1,6 +1,6 @@
 *.bak
 .mock*
-result/*
+# result/*
 .swo
 .swp
 node_modules

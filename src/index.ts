@@ -1,49 +1,66 @@
 const { faker } = require("@faker-js/faker");
 const fs = require("fs");
+const mockEntry = require("./mock-entry.ts");
 
-const FILE_NAME = "mock_data-2.json";
+function fileExists(filename: string) {
+  try {
+    fs.accessSync(filename);
+    return true;
+  } catch (ex) {
+    return false;
+  }
+}
+
+function checkAndAppendNumber(filename: string) {
+  let newFilename = filename;
+  let counter = 1;
+
+  while (fileExists(newFilename + ".json")) {
+    console.log("FILE EXISTS: ", newFilename);
+    const extensionIndex = filename.lastIndexOf(".");
+    const extension =
+      extensionIndex !== -1 ? filename.slice(extensionIndex) : "";
+    const baseFilename =
+      extensionIndex !== -1 ? filename.slice(0, extensionIndex) : filename;
+
+    newFilename = baseFilename + "-" + counter + extension;
+    counter++;
+  }
+
+  return newFilename;
+}
+
+const FILE_NAME = checkAndAppendNumber("result/mock_data") + ".json";
+const NUMBER_OF_ENTRIES = 2000000;
 
 const writeStream = fs.createWriteStream(FILE_NAME, { flags: "a" });
 
-let i = 1;
+let entry_number = 1;
+let done = false;
 
 function write() {
   let ok = true;
   do {
-    if (i > 2000000) {
+    if (entry_number > NUMBER_OF_ENTRIES) {
       writeStream.end();
       return;
     }
 
-    const mockEntry = {
-      id: i,
-      name: `Text ${faker.string.alpha({ length: { min: 5, max: 10 } })}`,
-      type: "SMS",
-      businessUnit: "UK",
-      zoneId: 1,
-      contentTitle: `Text ${faker.string.alpha({
-        length: { min: 5, max: 10 },
-      })}`,
-      contentBody: "Description",
-      audienceQuery: {
-        field: "driverId",
-        operator: "in",
-        value: [faker.number.int({ min: 100000, max: 999999 })],
-      },
-      scheduledDate: null,
-      sentDate: faker.date.past(),
-      status: "sent",
-    };
+    console.log("n: ", entry_number);
+    if (entry_number === NUMBER_OF_ENTRIES) {
+      console.log("Generated", entry_number, "entries in", FILE_NAME);
+    }
+    ok = writeStream.write(
+      JSON.stringify(mockEntry(entry_number)) + ",",
+      (err: Error) => {
+        if (err) throw err;
+      }
+    );
 
-    console.log("n: ", i);
-    ok = writeStream.write(JSON.stringify(mockEntry) + ",", (err) => {
-      if (err) throw err;
-    });
+    entry_number++;
+  } while (entry_number <= NUMBER_OF_ENTRIES && ok);
 
-    i++;
-  } while (i <= 2000000 && ok);
-
-  if (i <= 2000000) {
+  if (entry_number <= NUMBER_OF_ENTRIES) {
     writeStream.once("drain", write);
   }
 }
